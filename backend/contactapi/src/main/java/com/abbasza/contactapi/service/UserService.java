@@ -5,9 +5,9 @@ import com.abbasza.contactapi.repository.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.core.userdetails.UsernameNotFoundException;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,18 +16,25 @@ import java.time.LocalDateTime;
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
 public class UserService {
-    @Autowired
     private ContactService contactService;
-    @Autowired
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Autowired
+    public UserService(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setContactService(ContactService contactService) {
+        this.contactService = contactService;
+    }
 
 
     public User saveNewUser(User user){
         try{
             log.info("Creating User: {}", user.getUserName());
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+//            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedTime(LocalDateTime.now());
             return userRepo.save(user);
         } catch (Exception e) {
@@ -61,7 +68,8 @@ public class UserService {
     public User findUserByUserName(String username){
         return userRepo.findUserByUserName(username).orElseThrow(() -> {
             log.error("USER: {} not found", username);
-            return new UsernameNotFoundException("Username not found " + username);
+            return new RuntimeException();
+//            return new UsernameNotFoundException("Username not found " + username);
         });
     }
 }

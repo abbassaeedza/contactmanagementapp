@@ -18,7 +18,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Table(name = "contacts" ,indexes = {
-        @Index(name= "idx_email", columnList = "email"),
         @Index(name= "idx_firstname_lastname", columnList = "firstName, lastName")
 })
 public class Contact {

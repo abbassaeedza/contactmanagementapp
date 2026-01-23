@@ -10,6 +10,4 @@ import java.util.UUID;
 
 @Repository
 public interface ContactRepo extends JpaRepository<Contact, UUID> {
-    Optional<Contact> findContactsByFirstName(String firstName, Sort sort);
-    Optional<Contact> findContactbyEmail(String email);
 }

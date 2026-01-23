@@ -6,6 +6,7 @@ import com.abbasza.contactapi.repository.ContactRepo;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -17,10 +18,20 @@ import java.util.UUID;
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
 public class ContactService {
-    @Autowired
-    private ContactRepo contactRepo;
-    @Autowired
+    private final ContactRepo contactRepo;
     private UserService userService;
+
+    @Autowired
+    public ContactService(ContactRepo contactRepo) {
+        this.contactRepo = contactRepo;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Value("${DB_DATABASE}")
+    private String valuee;
 
     public Page<Contact> getAllContacts(int page, int size){
         return contactRepo.findAll(PageRequest.of(page, size, Sort.by("firstName")));
