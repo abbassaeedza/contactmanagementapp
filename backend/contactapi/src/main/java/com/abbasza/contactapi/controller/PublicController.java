@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class PublicController {
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public PublicController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/health-check")
     public ResponseEntity<String> healthCheck(){
@@ -22,7 +26,11 @@ public class PublicController {
 
     @PostMapping("/create-user")
     public ResponseEntity<User> createUser(@RequestBody User user){
-        userService.saveUser(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        try {
+            User newUser = userService.saveNewUser(user);
+            return ResponseEntity.ok().body(newUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

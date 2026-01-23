@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,15 +23,27 @@ import java.util.UUID;
 public class Contact {
     @Id
     @UuidGenerator
-    @Column(unique = true, updatable = false)
+    @Column(unique = true, updatable = false, nullable = false)
     private UUID id;
     private String firstName;
     private String lastName;
     private String title;
-    @Column(unique = true)
-    @ElementCollection
-    private Map<String, String> email = new HashMap<>();
-    @Column(unique = true)
-    @ElementCollection
-    private Map<String, String> phone = new HashMap<>();
+    @ElementCollection()
+    @CollectionTable(
+            name = "contact_email",
+            joinColumns = @JoinColumn(name = "contact_id")
+    )
+    @MapKeyEnumerated(EnumType.STRING)
+    @MapKeyColumn(name = "email_type", columnDefinition = "VARCHAR")
+    @Column(name = "email_value", nullable = false)
+    private Map<EmailKey, String> email = new EnumMap<>(EmailKey.class);
+    @ElementCollection()
+    @CollectionTable(
+            name = "contact_phone",
+            joinColumns = @JoinColumn(name = "contact_id")
+    )
+    @MapKeyEnumerated(EnumType.STRING)
+    @MapKeyColumn(name = "phone_type", columnDefinition = "VARCHAR")
+    @Column(name = "phone_value", nullable = false)
+    private Map<PhoneKey, String> phone = new EnumMap<>(PhoneKey.class);
 }

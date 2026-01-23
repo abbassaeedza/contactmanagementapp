@@ -1,6 +1,7 @@
 package com.abbasza.contactapi.service;
 
 import com.abbasza.contactapi.model.User;
+import com.abbasza.contactapi.repository.ContactRepo;
 import com.abbasza.contactapi.repository.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -15,61 +16,56 @@ import java.time.LocalDateTime;
 @Service
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
-public class UserService {
-    private ContactService contactService;
-    private final UserRepo userRepo;
+public class UserService { private final UserRepo userRepo;
+    private final ContactRepo contactRepo;
 
 //    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
-    public UserService(UserRepo userRepo) {
+    public UserService(UserRepo userRepo, ContactRepo contactRepo) {
         this.userRepo = userRepo;
+        this.contactRepo = contactRepo;
     }
-
-    public void setContactService(ContactService contactService) {
-        this.contactService = contactService;
-    }
-
 
     public User saveNewUser(User user){
         try{
-            log.info("Creating User: {}", user.getUserName());
+            log.info("Creating USER: {}", user.getEmail());
 //            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedTime(LocalDateTime.now());
             return userRepo.save(user);
         } catch (Exception e) {
-            log.error("Error occured while creating USER: {}", user.getUserName());
+            log.error("Error occured while creating USER: {}", user.getEmail());
             throw new RuntimeException(e);
         }
     }
 
     public User saveUser(User user){
         try{
-            log.info("Updating USER: {}", user.getUserName());
+            log.info("Updating USER: {}", user.getEmail());
             return userRepo.save(user);
         }catch (Exception e){
-            log.error("Error occured while updating USER: {}", user.getUserName());
+            log.error("Error occured while updating USER: {}", user.getEmail());
             throw new RuntimeException(e);
         }
     }
 
-    public void deleteUser(String username){
+    public void deleteUser(String email){
         try {
-            log.info("Deleting USER: {}", username);
-            User user = findUserByUserName(username);
-            user.getContacts().forEach(x -> contactService.deleteContactById(x.getId()));
+            log.info("Deleting USER: {}", email);
+            User user = findUserByEmail(email);
+            user.getContacts().forEach(x -> contactRepo.deleteById(x.getId()));
             userRepo.deleteById(user.getId());
         } catch (Exception e) {
-            log.error("Error occured while deleting USER: {}", username);
+            log.error("Error occured while deleting USER: {}", email);
             throw new RuntimeException(e);
         }
     }
 
-    public User findUserByUserName(String username){
-        return userRepo.findUserByUserName(username).orElseThrow(() -> {
-            log.error("USER: {} not found", username);
+    public User findUserByEmail(String email){
+        return userRepo.findUserByEmail(email).orElseThrow(() -> {
+            log.error("USER: {} not found", email);
             return new RuntimeException();
-//            return new UsernameNotFoundException("Username not found " + username);
+//            return new UsernameNotFoundException("Username not found " + email);
         });
     }
 }
