@@ -83,4 +83,14 @@ public class ContactService {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteContactById(UUID id) {
+        try {
+            log.info("Deleting Contact: {}", id);
+            contactRepo.deleteById(id);
+        } catch (Exception e) {
+            log.error("Error occured while deleting Contact: {}", id);
+            throw new RuntimeException(e);
+        }
+    }
 }

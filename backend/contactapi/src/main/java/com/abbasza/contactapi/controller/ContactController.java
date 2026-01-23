@@ -17,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/v1/contact")
 public class ContactController {
-
     private final ContactService contactService;
     private final UserService userService;
 

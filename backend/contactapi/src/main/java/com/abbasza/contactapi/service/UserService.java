@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,19 +17,20 @@ import java.time.LocalDateTime;
 @Service
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
-public class UserService { private final UserRepo userRepo;
-    private final ContactRepo contactRepo;
+public class UserService {
+    private final ContactService contactService;
+    private final UserRepo userRepo;
 
 //    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
-    public UserService(UserRepo userRepo, ContactRepo contactRepo) {
+    public UserService(UserRepo userRepo, @Lazy ContactService contactService) {
         this.userRepo = userRepo;
-        this.contactRepo = contactRepo;
+        this.contactService = contactService;
     }
 
-    public User saveNewUser(User user){
-        try{
+    public User saveNewUser(User user) {
+        try {
             log.info("Creating USER: {}", user.getEmail());
 //            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedTime(LocalDateTime.now());
@@ -39,21 +41,21 @@ public class UserService { private final UserRepo userRepo;
         }
     }
 
-    public User saveUser(User user){
-        try{
+    public User saveUser(User user) {
+        try {
             log.info("Updating USER: {}", user.getEmail());
             return userRepo.save(user);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error occured while updating USER: {}", user.getEmail());
             throw new RuntimeException(e);
         }
     }
 
-    public void deleteUser(String email){
+    public void deleteUser(String email) {
         try {
             log.info("Deleting USER: {}", email);
             User user = findUserByEmail(email);
-            user.getContacts().forEach(x -> contactRepo.deleteById(x.getId()));
+            user.getContacts().forEach(x -> contactService.deleteContactById(x.getId()));
             userRepo.deleteById(user.getId());
         } catch (Exception e) {
             log.error("Error occured while deleting USER: {}", email);
@@ -61,7 +63,7 @@ public class UserService { private final UserRepo userRepo;
         }
     }
 
-    public User findUserByEmail(String email){
+    public User findUserByEmail(String email) {
         return userRepo.findUserByEmail(email).orElseThrow(() -> {
             log.error("USER: {} not found", email);
             return new RuntimeException();
