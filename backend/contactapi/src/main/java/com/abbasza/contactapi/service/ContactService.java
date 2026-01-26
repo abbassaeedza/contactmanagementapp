@@ -27,10 +27,6 @@ public class ContactService {
         this.userService = userService;
     }
 
-    @Value("${DB_DATABASE}")
-    private String valuee;
-
-
     public Page<Contact> getAllContacts(int page, int size) {
         return contactRepo.findAll(PageRequest.of(page, size, Sort.by("firstName")));
     }

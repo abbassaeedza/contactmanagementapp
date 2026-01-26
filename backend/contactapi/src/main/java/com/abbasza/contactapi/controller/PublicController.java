@@ -3,6 +3,7 @@ package com.abbasza.contactapi.controller;
 import com.abbasza.contactapi.model.User;
 import com.abbasza.contactapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,8 @@ public class PublicController {
         this.userService = userService;
     }
 
-    @GetMapping("/health-check")
+    @Profile("!prod")
+    @GetMapping("/")
     public ResponseEntity<String> healthCheck(){
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
