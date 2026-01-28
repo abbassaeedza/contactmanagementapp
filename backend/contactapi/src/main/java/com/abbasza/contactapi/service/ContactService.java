@@ -3,52 +3,56 @@ package com.abbasza.contactapi.service;
 import com.abbasza.contactapi.model.Contact;
 import com.abbasza.contactapi.model.User;
 import com.abbasza.contactapi.repository.ContactRepo;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
 public class ContactService {
     private final ContactRepo contactRepo;
     private final UserService userService;
 
-    @Autowired
-    public ContactService(ContactRepo contactRepo, UserService userService) {
-        this.contactRepo = contactRepo;
-        this.userService = userService;
+    @PreAuthorize("#username == authentication.principal.username")
+    public Page<Contact> getAllContacts(String username, int page, int size) {
+        User user = userService.findUserByUsername(username);
+        return contactRepo.findContactsByUserId(user.getId(), PageRequest.of(page, size, Sort.by("firstName")));
     }
 
-    public Page<Contact> getAllContacts(int page, int size) {
-        return contactRepo.findAll(PageRequest.of(page, size, Sort.by("firstName")));
-    }
-
-    public Contact getContactById(UUID id) {
-        return contactRepo.findById(id).orElseThrow(() -> {
+    @PreAuthorize("#username == authentication.principal.username")
+    public Contact getContactById(String username, UUID id) {
+        User user = userService.findUserByUsername(username);
+        Optional<Contact> contact = contactRepo.findContactByIdAndUserId(id, user.getId());
+        return contact.orElseThrow(() -> {
             log.info("Contact: {} Not Found", id);
-            return new RuntimeException("Contact Not Found" + id);
+            return new EntityNotFoundException("Contact Not Found" + id);
         });
     }
 
-    public Contact saveContact(Contact contact, String email) {
+    @PreAuthorize("#username == authentication.principal.username")
+    public Contact saveContact(String username, Contact contact) {
         try {
-            Contact savedContact = contactRepo.save(contact);
-            log.info("Creating Contact: {}", savedContact.getId());
-            User user = userService.findUserByEmail(email);
-            user.getContacts().add(savedContact);
-            userService.saveUser(user);
-            return savedContact;
-        } catch (RuntimeException e) {
+            log.info("Creating Contact for User: {}", username);
+            User user = userService.findUserByUsername(username);
+            contact.setUser(user);
+            return contactRepo.save(contact);
+        } catch (Exception e) {
             log.error("Error occured while creating Contact: {}", contact.getId());
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -56,27 +60,28 @@ public class ContactService {
         try {
             log.info("Updating Contact: {}", contact.getId());
             contactRepo.save(contact);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.error("Error occured while updating Contact: {}", contact.getId());
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 
-    public boolean deleteContactById(UUID id, String email) {
+    @PreAuthorize("#username == authentication.principal.username")
+    public boolean deleteContactById(String username, UUID id) {
         try {
             log.info("Deleting Contact: {}", id);
-            User user = userService.findUserByEmail(email);
-            boolean removed = user.getContacts().removeIf(x -> x.getId().equals(id));
-            if (removed) {
-                userService.saveUser(user);
+            User user = userService.findUserByUsername(username);
+            Optional<Contact> contact = contactRepo.findContactByIdAndUserId(id, user.getId());
+            if (contact.isPresent()) {
                 contactRepo.deleteById(id);
-            }else{
-                log.info("Contact Not Found: {}", id);
+                return true;
+            } else {
+                log.info("Contact: {} Not Found", id);
+                throw new EntityNotFoundException();
             }
-            return removed;
         } catch (Exception e) {
             log.error("Error occured while deleting Contact: {}", id);
-            throw new RuntimeException(e);
+            throw new EntityNotFoundException(e);
         }
     }
 
