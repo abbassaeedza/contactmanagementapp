@@ -1,51 +1,86 @@
--- APP_USER
-CREATE TABLE IF NOT EXISTS app_user
+--
+-- Name: app_user; Type: TABLE; Schema: public; Owner: root
+--
+
+CREATE TABLE app_user
 (
-    id            UUID PRIMARY KEY,
-    created_time  TIMESTAMP(6),
-    email         VARCHAR(255) NOT NULL UNIQUE,
-    first_name    VARCHAR(255),
-    last_name     VARCHAR(255),
-    password_hash VARCHAR(255) NOT NULL,
-    phone         VARCHAR(255) UNIQUE
+    created_time timestamp(6) without time zone,
+    id           uuid                   NOT NULL PRIMARY KEY,
+    email        character varying(255),
+    first_name   character varying(255),
+    last_name    character varying(255),
+    password     character varying(255) NOT NULL,
+    phone        character varying(255),
+    UNIQUE (phone),
+    UNIQUE (email),
+
+    CONSTRAINT email_notnull_or_phone_notnull CHECK (
+        (email IS NOT NULL AND phone IS NULL)
+            OR
+        (email IS NULL AND phone IS NOT NULL)
+        )
 );
 
-CREATE INDEX idx_email ON app_user (email);
+-- Name: idx_email; Type: INDEX; Schema: public; Owner: root
+--
 
--- CONTACTS
-CREATE TABLE IF NOT EXISTS contacts
+CREATE INDEX idx_email ON app_user USING btree (email);
+
+ALTER TABLE app_user
+    ADD COLUMN login_count INT GENERATED ALWAYS AS (
+    (email IS NOT NULL)::int + (phone IS NOT NULL)::int
+) STORED;
+
+ALTER TABLE app_user
+    ADD CONSTRAINT chk_one_login_only CHECK (login_count = 1);
+
+
+
+-- Name: contacts; Type: TABLE; Schema: public; Owner: root
+--
+
+CREATE TABLE contacts
 (
-    id         UUID PRIMARY KEY,
-    first_name VARCHAR(255),
-    last_name  VARCHAR(255),
-    title      VARCHAR(255)
+    id         uuid NOT NULL PRIMARY KEY,
+    user_id    uuid NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    first_name character varying(255),
+    last_name  character varying(255),
+    title      character varying(255)
 );
 
-CREATE INDEX idx_firstname_lastname
-    ON contacts (first_name, last_name);
+-- Name: idx_firstname_lastname; Type: INDEX; Schema: public; Owner: root
+--
 
--- APP_USER_CONTACTS
-CREATE TABLE IF NOT EXISTS app_user_contacts
+CREATE INDEX idx_firstname_lastname ON contacts USING btree (first_name, last_name);
+
+
+--
+-- Name: contact_email; Type: TABLE; Schema: public; Owner: root
+--
+
+CREATE TABLE contact_email
 (
-    user_id     UUID NOT NULL REFERENCES app_user (id) NOCHECK,
-    contacts_id UUID NOT NULL REFERENCES contacts (id) NOCHECK,
-    UNIQUE (contacts_id)
+    contact_id  uuid                   NOT NULL REFERENCES contacts (id) ON DELETE CASCADE,
+    email_type  character varying      NOT NULL,
+    email_value character varying(255) NOT NULL,
+    PRIMARY KEY (contact_id, email_type),
+    CONSTRAINT contact_email_email_type_check CHECK (((email_type)::text = ANY ((ARRAY['WORK':: character varying, 'PERSONAL':: character varying, 'OTHER':: character varying])::text[])
+) )
 );
 
--- CONTACT_EMAIL
-CREATE TABLE IF NOT EXISTS contact_email
+
+-- Name: contact_phone; Type: TABLE; Schema: public; Owner: root
+--
+
+CREATE TABLE contact_phone
 (
-    contact_id  UUID         NOT NULL REFERENCES contacts (id),
-    email_value VARCHAR(255) NOT NULL,
-    email_type  VARCHAR      NOT NULL,
-    PRIMARY KEY (contact_id, email_type)
+    contact_id  uuid                   NOT NULL REFERENCES contacts (id) ON DELETE CASCADE,
+    phone_type  character varying      NOT NULL,
+    phone_value character varying(255) NOT NULL,
+    PRIMARY KEY (contact_id, phone_type),
+    CONSTRAINT contact_phone_phone_type_check CHECK (((phone_type)::text = ANY ((ARRAY['WORK':: character varying, 'HOME':: character varying, 'PERSONAL':: character varying, 'OTHER':: character varying])::text[])
+) )
 );
 
--- CONTACT_PHONE
-CREATE TABLE IF NOT EXISTS contact_phone
-(
-    contact_id  UUID         NOT NULL REFERENCES contacts (id),
-    phone_value VARCHAR(255) NOT NULL,
-    phone_type  VARCHAR      NOT NULL,
-    PRIMARY KEY (contact_id, phone_type)
-);
+-- PostgreSQL database dump complete
+--

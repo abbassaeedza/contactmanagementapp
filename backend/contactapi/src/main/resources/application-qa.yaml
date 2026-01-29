@@ -10,9 +10,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 #  sql:
 #    init:
 #      mode: always
@@ -29,3 +26,8 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+
+server:
+  servlet:
+    context-path: /api/v1
+  port: 8080
