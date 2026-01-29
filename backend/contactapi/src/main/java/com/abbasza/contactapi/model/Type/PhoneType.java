@@ -1,4 +1,4 @@
-package com.abbasza.contactapi.model.Type;
+package com.abbasza.contactapi.model.type;
 
 public enum PhoneType {
     WORK,

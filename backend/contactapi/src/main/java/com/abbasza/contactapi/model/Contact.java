@@ -1,7 +1,7 @@
 package com.abbasza.contactapi.model;
 
-import com.abbasza.contactapi.model.Type.EmailType;
-import com.abbasza.contactapi.model.Type.PhoneType;
+import com.abbasza.contactapi.model.type.EmailType;
+import com.abbasza.contactapi.model.type.PhoneType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package com.abbasza.contactapi.dto;
 
-import com.abbasza.contactapi.model.Type.EmailType;
-import com.abbasza.contactapi.model.Type.PhoneType;
+import com.abbasza.contactapi.model.type.EmailType;
+import com.abbasza.contactapi.model.type.PhoneType;
 import lombok.Data;
 
 import java.util.Map;

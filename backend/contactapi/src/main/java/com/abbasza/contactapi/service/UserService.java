@@ -25,15 +25,13 @@ import java.util.Optional;
 @Transactional(rollbackOn = Exception.class)
 @Slf4j
 public class UserService {
-    private final ContactService contactService;
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public UserService(UserRepo userRepo, @Lazy ContactService contactService, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepo = userRepo;
-        this.contactService = contactService;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
     }

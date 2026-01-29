@@ -10,9 +10,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-#  sql:
-#    init:
-#      mode: always
+  sql:
+    init:
+      mode: never
 
 logging:
   level:
@@ -31,3 +31,6 @@ server:
   servlet:
     context-path: /api/v1
   port: 8080
+
+sonar:
+  login: ${SONAR_LOGIN}
