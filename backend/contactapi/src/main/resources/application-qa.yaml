@@ -10,9 +10,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-  sql:
-    init:
-      mode: always
+#  sql:
+#    init:
+#      mode: always
 
 logging:
   level:

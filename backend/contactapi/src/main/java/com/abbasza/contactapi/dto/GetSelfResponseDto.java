@@ -2,11 +2,12 @@ package com.abbasza.contactapi.dto;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
-public class SignupRequestDto {
-    private String email;
-    private String phone;
+public class GetSelfResponseDto {
+    private UUID id;
+    private String username;
     private String firstName;
     private String lastName;
-    private String password;
 }

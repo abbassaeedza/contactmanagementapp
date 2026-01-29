@@ -1,5 +1,9 @@
 package com.abbasza.contactapi.controller;
 
+import com.abbasza.contactapi.dto.ChangePassRequestDto;
+import com.abbasza.contactapi.dto.GetSelfResponseDto;
+import com.abbasza.contactapi.dto.UpdateUserRequestDto;
+import com.abbasza.contactapi.dto.UpdateUserResponseDto;
 import com.abbasza.contactapi.model.User;
 import com.abbasza.contactapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,30 +21,27 @@ public class  UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<User> getSelf(){
+    public ResponseEntity<GetSelfResponseDto> getSelf(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        User user = userService.findUserByUsername(username);
-        return ResponseEntity.ok().body(user);
+        GetSelfResponseDto getSelfResponseDto = userService.getUser(username);
+        return ResponseEntity.ok().body(getSelfResponseDto);
     }
 
-    @PutMapping
-    public ResponseEntity<User> updateSelf(@RequestBody User updateUser){
+    @PutMapping("/edit")
+    public ResponseEntity<UpdateUserResponseDto> updateSelf(@RequestBody UpdateUserRequestDto updateUserRequestDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        User userInDB = userService.findUserByUsername(username);
-        userInDB.setEmail((updateUser.getEmail() != null && !updateUser.getEmail().isEmpty()) ? updateUser.getEmail() : userInDB.getEmail());
-        userInDB.setPhone((updateUser.getPhone() != null && !updateUser.getPhone().isEmpty()) ? updateUser.getPhone() : userInDB.getPhone());
-        userInDB.setFirstName((updateUser.getFirstName() != null && !updateUser.getFirstName().isEmpty()) ? updateUser.getFirstName() : userInDB.getFirstName());
-        userInDB.setLastName((updateUser.getLastName() != null && !updateUser.getLastName().isEmpty()) ? updateUser.getLastName() : userInDB.getLastName());
-        if (updateUser.getPassword() == null || updateUser.getPassword().isEmpty()) {
-            User user = userService.saveUser(userInDB);
-            return ResponseEntity.ok().body(user);
-        }else{
-            userInDB.setPassword(updateUser.getPassword());
-        }
-        User user = userService.saveNewUser(userInDB); //encode password again
-        return ResponseEntity.ok().body(user);
+        UpdateUserResponseDto updateUserResponseDto = userService.updateUser(username, updateUserRequestDto);
+        return ResponseEntity.ok().body(updateUserResponseDto);
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody ChangePassRequestDto changePassRequestDto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        boolean changed = userService.changePassword(username, changePassRequestDto);
+        return changed ? ResponseEntity.ok().build() : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @DeleteMapping()
