@@ -53,8 +53,8 @@ public class UserService {
             } else {
                 userInDB.setPhone((updateUserRequestDto.getPhone() != null && !updateUserRequestDto.getPhone().isEmpty()) ? updateUserRequestDto.getPhone() : userInDB.getPhone());
             }
-            userInDB.setFirstName((updateUserRequestDto.getFirstName() != null && !updateUserRequestDto.getFirstName().isEmpty()) ? updateUserRequestDto.getFirstName() : userInDB.getFirstName());
-            userInDB.setLastName((updateUserRequestDto.getLastName() != null && !updateUserRequestDto.getLastName().isEmpty()) ? updateUserRequestDto.getLastName() : userInDB.getLastName());
+            userInDB.setFirstName((updateUserRequestDto.getFirstname() != null && !updateUserRequestDto.getFirstname().isEmpty()) ? updateUserRequestDto.getFirstname() : userInDB.getFirstName());
+            userInDB.setLastName((updateUserRequestDto.getLastname() != null && !updateUserRequestDto.getLastname().isEmpty()) ? updateUserRequestDto.getLastname() : userInDB.getLastName());
 
             return modelMapper.map(userRepo.save(userInDB), UpdateUserResponseDto.class);
         } catch (Exception e) {
@@ -69,8 +69,8 @@ public class UserService {
             log.info("Changing Passowrd for USER: {}", username);
             User userInDB = findUserByUsername(username);
             String oldPassInDB = userInDB.getPassword();
-            String newPassHash = passwordEncoder.encode(changePassRequestDto.getNewPassword());
-            if (passwordEncoder.matches(changePassRequestDto.getOldPassword(), oldPassInDB)){
+            String newPassHash = passwordEncoder.encode(changePassRequestDto.getNewpassword());
+            if (passwordEncoder.matches(changePassRequestDto.getOldpassword(), oldPassInDB)){
                 userInDB.setPassword(newPassHash);
                 userRepo.save(userInDB);
                 return true;
@@ -104,5 +104,9 @@ public class UserService {
             log.error("USER: {} not found", username);
             return new UsernameNotFoundException("Username not found " + username);
         });
+    }
+
+    public void updateUser(User user){
+        userRepo.save(user);
     }
 }

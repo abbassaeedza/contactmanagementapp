@@ -64,8 +64,8 @@ public class AuthService {
 
         user = userRepo.save(User.builder()
                 .createdTime(LocalDateTime.now())
-                .firstName(signupRequestDto.getFirstName())
-                .lastName(signupRequestDto.getLastName())
+                .firstName(signupRequestDto.getFirstname())
+                .lastName(signupRequestDto.getLastname())
                 .email(signupRequestDto.getEmail())
                 .phone(signupRequestDto.getPhone())
                 .password(passwordEncoder.encode(signupRequestDto.getPassword()))

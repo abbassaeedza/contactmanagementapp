@@ -101,7 +101,7 @@ class AuthServiceTest {
         SignupRequestDto dto = new SignupRequestDto();
         dto.setEmail(EMAIL);
         dto.setPassword(PASSWORD);
-        dto.setFirstName("John");
+        dto.setFirstname("John");
 
         when(userRepo.findUserByEmail(EMAIL))
                 .thenReturn(Optional.empty());

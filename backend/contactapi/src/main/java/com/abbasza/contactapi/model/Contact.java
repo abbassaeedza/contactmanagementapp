@@ -1,18 +1,15 @@
 package com.abbasza.contactapi.model;
 
-import com.abbasza.contactapi.model.type.EmailType;
-import com.abbasza.contactapi.model.type.PhoneType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -22,37 +19,42 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@Table(name = "contacts" ,indexes = {
-        @Index(name= "idx_firstname_lastname", columnList = "firstName, lastName")
-})
+@Table(
+        name = "contacts",
+        indexes = {
+                @Index(name = "idx_firstname_lastname", columnList = "firstName, lastName")
+        }
+)
 public class Contact {
     @Id
     @UuidGenerator
-    @Column(unique = true, updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(nullable = false)
     private String firstName;
+
     private String lastName;
+
     private String title;
-    @ElementCollection()
-    @CollectionTable(
-            name = "contact_email",
-            joinColumns = @JoinColumn(name = "contact_id")
+
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "contact",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "email_type", columnDefinition = "VARCHAR")
-    @Column(name = "email_value", nullable = false)
-    private Map<EmailType, String> email = new EnumMap<>(EmailType.class);
-    @ElementCollection()
-    @CollectionTable(
-            name = "contact_phone",
-            joinColumns = @JoinColumn(name = "contact_id")
+    private List<ContactEmail> emails = new ArrayList<>();
+
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "contact",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "phone_type", columnDefinition = "VARCHAR")
-    @Column(name = "phone_value", nullable = false)
-    private Map<PhoneType, String> phone = new EnumMap<>(PhoneType.class);
+    private List<ContactPhone> phones = new ArrayList<>();
 }

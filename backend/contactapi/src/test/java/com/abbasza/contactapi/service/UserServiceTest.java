@@ -134,8 +134,8 @@ class UserServiceTest {
     @Test
     void changePassword_shouldSucceed() {
         ChangePassRequestDto dto = new ChangePassRequestDto();
-        dto.setOldPassword("old");
-        dto.setNewPassword("new");
+        dto.setOldpassword("old");
+        dto.setNewpassword("new");
 
         when(userRepo.findUserByEmail(EMAIL))
                 .thenReturn(Optional.of(user));
@@ -154,7 +154,7 @@ class UserServiceTest {
     @Test
     void changePassword_shouldFailOnWrongOldPassword() {
         ChangePassRequestDto dto = new ChangePassRequestDto();
-        dto.setOldPassword("wrong");
+        dto.setOldpassword("wrong");
 
         when(userRepo.findUserByEmail(EMAIL))
                 .thenReturn(Optional.of(user));

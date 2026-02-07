@@ -14,10 +14,10 @@ spring:
       path: /public/h2-console
   sql:
     init:
-      mode: always
+      mode: never
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
 logging:
   level:

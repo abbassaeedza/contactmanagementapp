@@ -2,7 +2,10 @@ package com.abbasza.contactapi.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,25 +22,41 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@Table(name = "app_user", indexes = {
-        @Index(name = "idx_email", columnList = "email")
-})
+@Table(
+        name = "app_user",
+        indexes = {
+                @Index(name = "idx_email", columnList = "email")
+        }
+)
 public class User implements UserDetails {
     @Id
     @UuidGenerator
-    @Column(unique = true, updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
+
     @Column(unique = true)
     private String email;
+
     @Column(unique = true)
     private String phone;
+
     @Column(nullable = false)
     private String password;
+
     private String firstName;
+
     private String lastName;
+
     private LocalDateTime createdTime;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private transient List<Contact> contacts = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -45,9 +64,9 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        if ((getEmail() != null && !getEmail().isEmpty())){
+        if ((getEmail() != null && !getEmail().isEmpty())) {
             return getEmail();
-        }else{
+        } else {
             return getPhone();
         }
     }

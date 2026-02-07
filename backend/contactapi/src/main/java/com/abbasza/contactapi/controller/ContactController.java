@@ -1,8 +1,8 @@
 package com.abbasza.contactapi.controller;
 
-import com.abbasza.contactapi.dto.CreateContactRequestDto;
-import com.abbasza.contactapi.dto.GetContactResponseDto;
-import com.abbasza.contactapi.model.Contact;
+import com.abbasza.contactapi.dto.ContactDetailResponseDto;
+import com.abbasza.contactapi.dto.ContactRequestDto;
+import com.abbasza.contactapi.dto.ContactResponseDto;
 import com.abbasza.contactapi.service.ContactService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,48 +23,48 @@ public class ContactController {
     private final ContactService contactService;
 
     @GetMapping
-    public ResponseEntity<Page<GetContactResponseDto>> getAllContacts(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<Page<ContactResponseDto>> getAllContacts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                   @RequestParam(value = "size", defaultValue = "10") int size) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        Page<GetContactResponseDto> contactPage = contactService.getAllContacts(username, page, size);
+        Page<ContactResponseDto> contactPage = contactService.getAllContacts(username, page, size);
         return ResponseEntity.ok().body(contactPage);
     }
 
+    @GetMapping("/s")
+    public ResponseEntity<List<ContactResponseDto>> getSearchContacts(@RequestParam(value = "query") String query) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        List<ContactResponseDto> searchContacts = contactService.getSearchContacts(username, query);
+        return ResponseEntity.ok().body(searchContacts);
+    }
+
     @GetMapping("/{contactId}")
-    public ResponseEntity<GetContactResponseDto> getContact(@PathVariable UUID contactId) {
+    public ResponseEntity<ContactDetailResponseDto> getContact(@PathVariable UUID contactId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
-            GetContactResponseDto getContactResponseDto = contactService.getContact(username, contactId);
-            return ResponseEntity.ok().body(getContactResponseDto);
+            ContactDetailResponseDto contactDetailResponseDto = contactService.getContact(username, contactId);
+            return ResponseEntity.ok().body(contactDetailResponseDto);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PostMapping
-    public ResponseEntity<GetContactResponseDto> createContact(@RequestBody CreateContactRequestDto createContactRequestDto) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            GetContactResponseDto newContact = contactService.saveContact(username, createContactRequestDto);
-            return ResponseEntity.created(URI.create("/contact/" + newContact.getId())).body(newContact);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ContactDetailResponseDto> createContact(@RequestBody ContactRequestDto contactRequestDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ContactDetailResponseDto newContact = contactService.saveContact(username, contactRequestDto);
+        return ResponseEntity.created(URI.create("/contact/" + newContact.getId())).body(newContact);
     }
 
     @PutMapping("/{contactId}")
-    public ResponseEntity<GetContactResponseDto> updateContact(@PathVariable UUID contactId, @RequestBody CreateContactRequestDto updateContactRequestDto) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            GetContactResponseDto getContactResponseDto = contactService.updateContact(username, contactId, updateContactRequestDto);
-            return ResponseEntity.ok().body(getContactResponseDto);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ContactDetailResponseDto> updateContact(@PathVariable UUID contactId, @RequestBody ContactRequestDto updateContactRequestDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ContactDetailResponseDto contactDetailResponseDto = contactService.updateContact(username, contactId, updateContactRequestDto);
+        return ResponseEntity.ok().body(contactDetailResponseDto);
     }
 
     @DeleteMapping("/{contactId}")
