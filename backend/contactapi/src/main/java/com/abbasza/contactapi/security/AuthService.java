@@ -6,6 +6,7 @@ import com.abbasza.contactapi.dto.SignupRequestDto;
 import com.abbasza.contactapi.dto.SignupResponseDto;
 import com.abbasza.contactapi.model.User;
 import com.abbasza.contactapi.repository.UserRepo;
+import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,7 +60,7 @@ public class AuthService {
 
         if (user != null) {
             log.info("USER: {} Already Exists", user.getUsername());
-            throw new IllegalArgumentException("User already exists");
+            throw new EntityExistsException("User already exists");
         }
 
         user = userRepo.save(User.builder()
