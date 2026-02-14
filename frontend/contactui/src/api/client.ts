@@ -6,7 +6,10 @@ function getAuthHeader(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-function buildUrl(path: string, params?: Record<string, string | number>): string {
+function buildUrl(
+  path: string,
+  params?: Record<string, string | number>,
+): string {
   const pathPart = path.startsWith('/') ? path : `/${path}`;
   let url = `${baseUrl}${pathPart}`;
   if (params && Object.keys(params).length > 0) {
@@ -28,7 +31,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
       if (json.message) message = json.message;
       else if (json.error) message = json.error;
     } catch {
-      // use text as message
+      // pass
     }
     throw new Error(message || `Request failed: ${res.status}`);
   }
@@ -39,7 +42,10 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return undefined as unknown as T;
 }
 
-export async function apiGet<T>(path: string, params?: Record<string, string | number>): Promise<T> {
+export async function apiGet<T>(
+  path: string,
+  params?: Record<string, string | number>,
+): Promise<T> {
   const url = buildUrl(path, params);
   const res = await fetch(url, {
     method: 'GET',
@@ -88,7 +94,7 @@ export async function apiDelete(path: string): Promise<void> {
       if (json.message) message = json.message;
       else if (json.error) message = json.error;
     } catch {
-      // use text as message
+      // pass
     }
     throw new Error(message || `Request failed: ${res.status}`);
   }
