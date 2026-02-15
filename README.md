@@ -110,12 +110,18 @@ Layer Tests - Mockito-based mocking - JUnit 5
 
 ## Getting Started
 
+Prerequisites:
+
+- Java 17
+- Nodejs
+- Maven
+- Docker
+
 ### Backend
 
-Prerequisites: - Java 17 - Maven - Docker
-
 ```
-mvn clean install mvn spring-boot:run
+cd backend/contactapi
+mvn clean install
 
 Backend runs at: http://localhost:8080
 ```
@@ -125,7 +131,9 @@ Backend runs at: http://localhost:8080
 ### Frontend
 
 ```
-npm install npm run dev
+cd frontend/contactui
+npm install
+npm run dev
 
 Frontend runs at: http://localhost:3000
 ```
