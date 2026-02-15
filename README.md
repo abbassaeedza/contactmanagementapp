@@ -110,14 +110,66 @@ Layer Tests - Mockito-based mocking - JUnit 5
 
 ## Getting Started
 
-Prerequisites:
+### Prerequisites:
 
 - Java 17
 - Nodejs
 - Maven
 - Docker
 
+#### Setup `.env` file:
+
+```
+cd backend/contactapi
+
+code .env
+```
+
+copy the following and paste in `.env` file
+
+```
+### APPLICATION ###
+APP_NAME=contactapi
+APP_URL=localhost:8080
+
+### DATABASE ###
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=contacts
+DB_USER=user
+DB_PASSWORD=pass
+
+H2_URL="jdbc:h2:mem:${DB_DATABASE};MODE=PostgreSQL"
+PG_URL="jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}"
+
+### H2 DB ###
+H2_DB_CONNECTION=h2
+
+### PG DB ###
+PG_DB_CONNECTION=postgresql
+
+### JWT ###
+JWT_SECRET={yoursecret}
+
+### SonarQube ###
+SONAR_LOGIN={yourlogin}
+```
+
+#### Docker:
+
+```
+Start containers:
+
+docker-compose up -d
+
+SonarQube: http://localhost:9001
+```
+
+---
+
 ### Backend
+
+Run the backend:
 
 ```
 cd backend/contactapi
@@ -136,18 +188,6 @@ npm install
 npm run dev
 
 Frontend runs at: http://localhost:3000
-```
-
----
-
-## Docker
-
-```
-Start containers:
-
-docker-compose up -d
-
-SonarQube: http://localhost:9001
 ```
 
 ---
