@@ -100,6 +100,12 @@ export default function ContactsPage() {
     if (!debouncedQuery) setPage(0);
   }, [debouncedQuery]);
 
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(''), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
+
   const contacts = debouncedQuery
     ? (searchResults ?? [])
     : (paginatedData?.content ?? []);
@@ -308,8 +314,16 @@ export default function ContactsPage() {
         </div>
 
         {error && (
-          <div className='mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-800'>
+          <div className='mb-4 p-3 pr-10 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-800 relative'>
             {error}
+            <button
+              type='button'
+              onClick={() => setError('')}
+              className='absolute top-2 right-2 p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded'
+              aria-label='Close'
+            >
+              <IconClose className='w-4 h-4' />
+            </button>
           </div>
         )}
 
@@ -353,10 +367,11 @@ export default function ContactsPage() {
           </div>
         )}
 
-        {isPaginated && totalPages > 1 && (
+        {isPaginated && (
           <div className='mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400'>
             <span>
-              Page {page + 1} of {totalPages} ({totalElements} total)
+              Page {page + 1} of {Math.max(1, totalPages)} ({totalElements}{' '}
+              total)
             </span>
             <div className='flex gap-2'>
               <button
@@ -369,8 +384,10 @@ export default function ContactsPage() {
               </button>
               <button
                 type='button'
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
+                onClick={() =>
+                  setPage((p) => Math.min(Math.max(0, totalPages - 1), p + 1))
+                }
+                disabled={totalPages <= 1 || page >= totalPages - 1}
                 className='px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Next

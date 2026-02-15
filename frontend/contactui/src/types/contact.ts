@@ -11,6 +11,7 @@ export interface ContactPhoneDto {
   phonevalue: string;
 }
 
+/** Contact as returned in list/search (paginated or search results). */
 export interface ContactSummary {
   id: string;
   title: string | null;

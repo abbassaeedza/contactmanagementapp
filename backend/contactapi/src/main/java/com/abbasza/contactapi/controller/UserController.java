@@ -5,6 +5,7 @@ import com.abbasza.contactapi.dto.GetSelfResponseDto;
 import com.abbasza.contactapi.dto.UpdateUserRequestDto;
 import com.abbasza.contactapi.dto.UpdateUserResponseDto;
 import com.abbasza.contactapi.service.UserService;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
-public class  UserController {
+public class UserController {
     private final UserService userService;
 
     @GetMapping
@@ -35,7 +36,7 @@ public class  UserController {
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<HttpStatus> changePassword(@RequestBody ChangePassRequestDto changePassRequestDto){
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody ChangePassRequestDto changePassRequestDto) throws AuthException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         boolean changed = userService.changePassword(username, changePassRequestDto);

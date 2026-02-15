@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS app_user
         (email IS NOT NULL AND phone IS NULL)
             OR
         (email IS NULL AND phone IS NOT NULL)
-        )
+            OR
+        (phone IS NOT NULL)
+            OR
+        (email IS NOT NULL))
 );
 
 -- Name: idx_email; Type: INDEX; Schema: public; Owner: root
@@ -26,16 +29,16 @@ CREATE TABLE IF NOT EXISTS app_user
 
 CREATE INDEX IF NOT EXISTS idx_email ON app_user USING btree (email);
 
-ALTER TABLE app_user
-    ADD COLUMN IF NOT EXISTS login_count INT GENERATED ALWAYS AS (
-    (email IS NOT NULL)::int + (phone IS NOT NULL)::int
-) STORED;
+-- ALTER TABLE app_user
+--     ADD COLUMN IF NOT EXISTS login_count INT GENERATED ALWAYS AS (
+--     (email IS NOT NULL)::int + (phone IS NOT NULL)::int
+-- ) STORED;
 
-ALTER TABLE app_user
-    DROP CONSTRAINT IF EXISTS chk_one_login_only;
-
-ALTER TABLE app_user
-    ADD CONSTRAINT chk_one_login_only CHECK (login_count = 1);
+-- ALTER TABLE app_user
+--     DROP CONSTRAINT IF EXISTS chk_one_login_only;
+--
+-- ALTER TABLE app_user
+--     ADD CONSTRAINT chk_one_login_only CHECK (login_count = 1);
 
 
 

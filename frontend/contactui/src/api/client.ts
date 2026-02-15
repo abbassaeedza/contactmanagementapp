@@ -6,6 +6,11 @@ function getAuthHeader(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
+function handleUnauthorized(): void {
+  localStorage.removeItem('auth_token');
+  window.location.replace('/');
+}
+
 function buildUrl(
   path: string,
   params?: Record<string, string | number>,
@@ -23,6 +28,10 @@ function buildUrl(
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
+  if (res.status === 401 && localStorage.getItem('auth_token') != null) {
+    handleUnauthorized();
+    throw new Error('Session expired. Please log in again.');
+  }
   if (!res.ok) {
     const text = await res.text();
     let message = text;
@@ -47,10 +56,7 @@ export async function apiGet<T>(
   params?: Record<string, string | number>,
 ): Promise<T> {
   const url = buildUrl(path, params);
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: getAuthHeader(),
-  });
+  const res = await fetch(url, { method: 'GET', headers: getAuthHeader() });
   return handleResponse<T>(res);
 }
 
@@ -67,7 +73,12 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return handleResponse<T>(res);
 }
 
-export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+/** If skip401Logout is true, 401 responses throw without clearing token or redirecting (e.g. wrong password). */
+export async function apiPut<T>(
+  path: string,
+  body: unknown,
+  options?: { skip401Logout?: boolean },
+): Promise<T> {
   const url = buildUrl(path);
   const res = await fetch(url, {
     method: 'PUT',
@@ -77,15 +88,28 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
     },
     body: JSON.stringify(body),
   });
+  if (res.status === 401 && options?.skip401Logout) {
+    const text = await res.text();
+    let message = text;
+    try {
+      const json = JSON.parse(text);
+      if (json.message) message = json.message;
+      else if (json.error) message = json.error;
+    } catch {
+      // pass
+    }
+    throw new Error(message || 'Unauthorized');
+  }
   return handleResponse<T>(res);
 }
 
 export async function apiDelete(path: string): Promise<void> {
   const url = buildUrl(path);
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: getAuthHeader(),
-  });
+  const res = await fetch(url, { method: 'DELETE', headers: getAuthHeader() });
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error('Session expired. Please log in again.');
+  }
   if (!res.ok && res.status !== 204) {
     const text = await res.text();
     let message = text;

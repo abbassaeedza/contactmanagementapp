@@ -40,8 +40,7 @@ public class ContactService {
     public Page<ContactResponseDto> getAllContacts(String username, int page, int size) {
         User user = userService.findUserByUsername(username);
         Page<Contact> contacts = contactRepo.findContactsByUserId(user.getId(), PageRequest.of(page, size, Sort.by("firstName")));
-        List<ContactResponseDto> contactList = contacts.stream().map(contact -> modelMapper.map(contact, ContactResponseDto.class)).toList();
-        return new PageImpl<>(contactList);
+        return contacts.map(contact -> modelMapper.map(contact, ContactResponseDto.class));
     }
 
     @PreAuthorize("#username == authentication.principal.username")

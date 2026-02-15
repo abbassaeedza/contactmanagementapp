@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../api/client';
 import { setToken } from '../lib/auth';
 import { useTheme } from '../lib/theme';
 import type { LoginResponse, SignupResponseDto } from '../types/auth';
-import { isEmailOrPhone, getUsernameType } from '../utils/validation';
+import {
+  isEmailOrPhone,
+  getUsernameType,
+  isPasswordStrong,
+  PASSWORD_REQUIREMENTS,
+} from '../utils/validation';
 import { IconAuth, IconClose } from '../components/Icons';
 
 type Mode = 'login' | 'signup';
@@ -81,6 +86,10 @@ export default function AuthPage() {
       setError('Please enter a password.');
       return;
     }
+    if (!isPasswordStrong(signupPassword)) {
+      setError(PASSWORD_REQUIREMENTS);
+      return;
+    }
     const type = getUsernameType(signupUsername);
     const email = type === 'email' ? signupUsername.trim() : '';
     const phone = type === 'phone' ? signupUsername.trim() : '';
@@ -115,6 +124,12 @@ export default function AuthPage() {
     setMode('signup');
     clearMessages();
   }
+
+  useEffect(() => {
+    if (!error && !successMessage) return;
+    const t = setTimeout(() => clearMessages(), 5000);
+    return () => clearTimeout(t);
+  }, [error, successMessage]);
 
   return (
     <div className='min-h-screen flex flex-col items-center justify-center px-4'>
@@ -189,13 +204,29 @@ export default function AuthPage() {
           </div>
 
           {error && (
-            <div className='mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-800'>
+            <div className='mb-4 p-3 pr-10 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm border border-red-100 dark:border-red-800 relative'>
               {error}
+              <button
+                type='button'
+                onClick={() => setError('')}
+                className='absolute top-2 right-2 p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded'
+                aria-label='Close'
+              >
+                <IconClose className='w-4 h-4' />
+              </button>
             </div>
           )}
           {successMessage && (
-            <div className='mb-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm border border-emerald-100 dark:border-emerald-800'>
+            <div className='mb-4 p-3 pr-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm border border-emerald-100 dark:border-emerald-800 relative'>
               {successMessage}
+              <button
+                type='button'
+                onClick={() => setSuccessMessage('')}
+                className='absolute top-2 right-2 p-1 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 rounded'
+                aria-label='Close'
+              >
+                <IconClose className='w-4 h-4' />
+              </button>
             </div>
           )}
 
@@ -321,6 +352,10 @@ export default function AuthPage() {
                   placeholder='••••••••'
                   autoComplete='new-password'
                 />
+                <p className='mt-1.5 text-xs text-slate-500 dark:text-slate-400'>
+                  Min 8 characters, include uppercase, lowercase, number, and
+                  special character.
+                </p>
               </div>
               <button
                 type='submit'

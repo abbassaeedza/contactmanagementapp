@@ -8,10 +8,15 @@ function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
   if (stored === 'dark' || stored === 'light') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
-const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void } | null>(null);
+const ThemeContext = createContext<{
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+} | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);

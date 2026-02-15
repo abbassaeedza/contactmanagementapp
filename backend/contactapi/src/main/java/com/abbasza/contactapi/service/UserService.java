@@ -48,11 +48,9 @@ public class UserService {
             log.info("Updating USER: {}", username);
             User userInDB = findUserByUsername(username);
 
-            if (userRepo.existsUserByEmail(userInDB.getUsername())) {
-                userInDB.setEmail((updateUserRequestDto.getEmail() != null && !updateUserRequestDto.getEmail().isEmpty()) ? updateUserRequestDto.getEmail() : userInDB.getEmail());
-            } else {
-                userInDB.setPhone((updateUserRequestDto.getPhone() != null && !updateUserRequestDto.getPhone().isEmpty()) ? updateUserRequestDto.getPhone() : userInDB.getPhone());
-            }
+            userInDB.setEmail(updateUserRequestDto.getEmail());
+            userInDB.setPhone(updateUserRequestDto.getPhone());
+
             userInDB.setFirstName((updateUserRequestDto.getFirstname() != null && !updateUserRequestDto.getFirstname().isEmpty()) ? updateUserRequestDto.getFirstname() : userInDB.getFirstName());
             userInDB.setLastName((updateUserRequestDto.getLastname() != null && !updateUserRequestDto.getLastname().isEmpty()) ? updateUserRequestDto.getLastname() : userInDB.getLastName());
 
@@ -64,22 +62,22 @@ public class UserService {
     }
 
     @PreAuthorize("#username == authentication.principal.username")
-    public boolean changePassword(String username, ChangePassRequestDto changePassRequestDto){
-        try{
+    public boolean changePassword(String username, ChangePassRequestDto changePassRequestDto) throws AuthException {
+        try {
             log.info("Changing Passowrd for USER: {}", username);
             User userInDB = findUserByUsername(username);
             String oldPassInDB = userInDB.getPassword();
             String newPassHash = passwordEncoder.encode(changePassRequestDto.getNewpassword());
-            if (passwordEncoder.matches(changePassRequestDto.getOldpassword(), oldPassInDB)){
+            if (passwordEncoder.matches(changePassRequestDto.getOldpassword(), oldPassInDB)) {
                 userInDB.setPassword(newPassHash);
                 userRepo.save(userInDB);
                 return true;
-            }else {
-                throw new AuthException("Incorrect Password for USER: " + username);
+            } else {
+                throw new AuthException("Incorrect Password");
             }
         } catch (Exception e) {
             log.error("Incorrect Password for USER: {}", username);
-            throw new IllegalArgumentException(e);
+            throw new AuthException(e);
         }
     }
 
@@ -106,7 +104,7 @@ public class UserService {
         });
     }
 
-    public void updateUser(User user){
+    public void updateUser(User user) {
         userRepo.save(user);
     }
 }

@@ -2,6 +2,7 @@ package com.abbasza.contactapi.error;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityExistsException;
+import jakarta.security.auth.message.AuthException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiError> handleAuthenticationException(AuthenticationException ex) {
         ApiError apiError = new ApiError("Authentication failed: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ApiError> handleAuthenticationException(AuthException ex) {
+        ApiError apiError = new ApiError("Authentication failed: Incorrect Password", HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 

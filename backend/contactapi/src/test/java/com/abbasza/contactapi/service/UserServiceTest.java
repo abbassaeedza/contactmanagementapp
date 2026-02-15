@@ -4,6 +4,7 @@ import com.abbasza.contactapi.dto.ChangePassRequestDto;
 import com.abbasza.contactapi.dto.UpdateUserRequestDto;
 import com.abbasza.contactapi.model.User;
 import com.abbasza.contactapi.repository.UserRepo;
+import jakarta.security.auth.message.AuthException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -132,7 +133,7 @@ class UserServiceTest {
     // ========== CHANGE PASSWORD ==========
 
     @Test
-    void changePassword_shouldSucceed() {
+    void changePassword_shouldSucceed() throws AuthException {
         ChangePassRequestDto dto = new ChangePassRequestDto();
         dto.setOldpassword("old");
         dto.setNewpassword("new");
